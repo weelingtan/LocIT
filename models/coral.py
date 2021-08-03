@@ -58,6 +58,12 @@ def apply_CORAL(Xs, Xt, ys=None, yt=None, scaling=True, k=10):
         Xt = scaler.fit_transform(Xt)
 
     # transfer
+    # Covariance indicates the level to which two variables vary together. 
+    # If we examine N-dimensional samples, X = [x_1, x_2, ... x_N]^T, 
+    # then the covariance matrix element C_{ij} is the covariance of x_i and x_j. 
+    # The element C_{ii} is the variance of x_i.
+    # cov_source, cov_target, csp, ctp, A_coral are (9, 9)
+    # Xsn is (550, 9)
     cov_source = np.cov(Xs.T) + np.eye(Xs.shape[1])
     cov_target = np.cov(Xt.T) + np.eye(Xt.shape[1])
     csp = sp.linalg.fractional_matrix_power(cov_source, -1/2)
@@ -66,8 +72,11 @@ def apply_CORAL(Xs, Xt, ys=None, yt=None, scaling=True, k=10):
     Xsn = np.dot(Xs, A_coral).real
 
     # combine
+    # X_combo is (1100, 9)
+    # y_combo is (1100, )
     X_combo = np.vstack((Xsn, Xt))
     y_combo = np.zeros(X_combo.shape[0], dtype=int)
+    # The rest are zeros because target domain samples are unknown
     y_combo[:len(ys)] = ys
 
     yt_scores = _kNN_anomaly_detection(X_combo, y_combo, Xt, k)
